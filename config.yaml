@@ -1,0 +1,159 @@
+# fca-interp pipeline configuration.
+# Edit before running. The pipeline.py CLI reads this on every command.
+
+project:
+  slug: "fca-interp"          # kebab-case; used as kernel/dataset prefix
+
+kaggle:
+  username: "mdariffaysalnayem"
+
+  # Datasets referenced by notebooks. The 'core' entry is created/updated by
+  # `pipeline.py upload-src`. Phase-result entries are created by
+  # `pipeline.py upload-results <phase>`. Add public dataset slugs as needed.
+  datasets:
+    core: "mdariffaysalnayem/fca-interp-core"
+    # Intermediate results, populated as phases complete:
+    # phase1_results: "mdariffaysalnayem/fca-interp-phase1-results"
+    # phase2_results: "mdariffaysalnayem/fca-interp-phase2-results"
+
+  # Optional extra files bundled into the core dataset alongside src/*.py.
+  # Useful for fixed inputs like train/val splits that all notebooks should see.
+  core_extras: []
+  # core_extras: ["results/splits_v1.json"]
+
+# Pipeline control
+pipeline:
+  phases:
+    phase1:
+      description: "Synthetic / smoke validation"
+      notebooks:
+        - id: "phase1a"
+          title: "First experiment"
+          gpu: false
+          timeout_hours: 3
+          datasets: []                # core is always included; list extras here
+          success_criteria:
+            - "experiment_complete == true"
+        - id: "phase1_toy"
+          title: "Toy superposition — P1 + P3 + P4"
+          gpu: false
+          timeout_hours: 3
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P1_met_any_scaling == true"
+            - "P3_met == true"
+            - "P4_met == true"
+        - id: "phase1_mnist"
+          title: "MNIST MLP — FCA vs k-means"
+          gpu: false
+          timeout_hours: 3
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+        - id: "phase1_p3diag"
+          title: "P3 reproducibility invariant diagnostic"
+          gpu: false
+          timeout_hours: 1
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+
+    phase2:
+      description: "SAE comparison — Galois embedding theorem + P2"
+      notebooks:
+        - id: "phase2_sae"
+          title: "SAE Galois embedding + structural polysemanticity"
+          gpu: false
+          timeout_hours: 3
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P2_met == true"
+        - id: "phase2_robust"
+          title: "Multi-seed robustness for P1, P2, theorem"
+          gpu: false
+          timeout_hours: 3
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P1_met == true"
+            - "P2_met == true"
+            - "THM_met == true"
+        - id: "phase2_p1rescue"
+          title: "P1 rescue: κ_S at S1 + trained vs random"
+          gpu: false
+          timeout_hours: 3
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P1_met == true"
+
+    phase3:
+      description: "Real transformer (Pythia-70M) — does the framework scale?"
+      notebooks:
+        - id: "phase3_pythia"
+          title: "Pythia-70M residual stream: P1 + P3 + Galois embedding"
+          gpu: false
+          timeout_hours: 4
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P1_met == true"
+            - "THM_met == true"
+        - id: "phase3_pythia_v2"
+          title: "Pythia-70M MLP post-act with sparse SAE + threshold sweep"
+          gpu: false
+          timeout_hours: 4
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P1_met == true"
+            - "THM_met == true"
+        - id: "phase3_track_b"
+          title: "Pythia-70M Track B: FCA on SAE-firing context"
+          gpu: false
+          timeout_hours: 4
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P1_met == true"
+            - "P3_met == true"
+        - id: "phase3_track_b_v2"
+          title: "Track B remedies: attribute implications + top-K lattice"
+          gpu: false
+          timeout_hours: 4
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P1_met == true"
+            - "P3_met == true"
+
+    phase4:
+      description: "Vocabulary-item aggregation on Pythia-70M"
+      notebooks:
+        - id: "phase4_vocab_agg"
+          title: "Pythia-70M vocab-type aggregation: P_vocab1 + P_vocab2 + P_vocab3"
+          gpu: false
+          timeout_hours: 4
+          datasets: []
+          success_criteria:
+            - "experiment_complete == true"
+            - "P_vocab1_met == true"
+            - "P_vocab2_met == true"
+
+    # phase2:
+    #   description: "Toy superposition + MNIST"
+    #   notebooks:
+    #     - id: "phase2a"
+    #       title: "Toy superposition FCA lattice"
+    #       gpu: false
+    #       datasets: []
+    #     - id: "phase2b"
+    #       title: "MNIST MLP penultimate-layer lattice"
+    #       gpu: false
+    #       datasets: []
+
+  max_retries_per_notebook: 5
+  poll_interval_seconds: 120
+  auto_advance: false
